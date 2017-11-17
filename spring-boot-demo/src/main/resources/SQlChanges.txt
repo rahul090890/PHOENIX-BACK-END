@@ -1,0 +1,69 @@
+create view timesheet_reports as (
+select 
+t.weekStartDate as weekStartDate,
+t.weekEndDate as weekEndDate,
+t.employeeId as employeeId,
+e.employeeCode as employeeCode,
+e.firstName as firstName,
+e.lastName as lastName,
+e.employeeType as employeeType,
+e.emailId as employeeEmail,
+t.managerId as approverId,
+t.managerName as approverName,
+t.customerId as customerId,
+t.customerName as customerName,
+c.customerCode as customerCode,
+t.customerProgramId as customerProgramId,
+t.customerProgramCode as customerProgramCode,
+t.customerProgramType as customerProgramType,
+t.departmentId as departmentId,
+d.departmentCode as departmentCode,
+d.departmentName as departmentName,
+t.projectId as projectId,
+p.projectCode as projectCode,
+t.projectName as projectName,
+t.projectType as projectType,
+t.taskid as taskId,
+t.taskName as taskName,
+t.timesheetdate as timesheetDate,
+t.taskHours as billedHours,
+t.timesheetStatus as timesheetStatus,
+t.comments as comments,
+t.createdDate as timesheetSubmittedDate
+from timesheet t , employee e, customer c, customerprogramcode cp, department d, project p, task ta
+where t.employeeId = e.employeeId and
+t.customerId = c.customerId and
+t.customerProgramId = cp.customerProgramId and
+t.departmentId = d.departmentId and
+t.projectId = p.projectId and
+t.taskid = ta.taskId
+);
+
+drop view if exists timesheetSummary;
+create view timesheetSummary as (
+select e.employeeId as employeeId, 
+e.firstName as firstName,
+ e.lastName as lastName, 
+ t.weekStartDate as weekStartDate, 
+ t.weekEndDate as  weekEndDate, 
+ sum(t.taskHours) as totalhours, 
+ t.timesheetStatus  as timesheetStatus, 
+ t.createdDate as createdDate, 
+ t.timesheetSequence as timesheetSequence,
+ e.employeeCode as employeeCode,
+ e.designation as designation,
+ e.employeeType as employeeType,
+ e.employementStatus as employementStatus,
+ manager.firstName as managerFirstName,
+ manager.lastName as managerLastName,
+ d.departmentCode as departmentCode,
+ d.departmentName as departmentName
+from timesheet t, Employee e, Employee manager, Department d
+where t.employeeId = e.employeeId and
+e.managerId = manager.employeeId and
+e.departmentId = d.departmentId
+group by t.employeeId, t.weekStartDate,t.timesheetstatus order by t.weekStartDate desc
+);
+
+--Rest Request
+By Employee - http://localhost:8080/hr/timesheetReport/byEmployee?startDate=2017-09-04&endDate=2017-09-10&employeeCode=1009-15&firstName=Kiran&lastName=Vagga
